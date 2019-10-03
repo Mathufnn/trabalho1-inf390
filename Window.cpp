@@ -4,6 +4,8 @@
 #include <GL/freeglut.h>
 #include "INF390.h"
 #include "Tetris.h"
+#include <chrono>
+#include <thread>
 using namespace std;
 
 struct retangulo
@@ -16,9 +18,10 @@ struct retangulo
 
 retangulo vet[13];
 int atual = 0;
-int janelaAtiva = 0; // 0 - menu, 1- jogo, 2- tela final
+int janelaAtiva = 0;    // 0 - menu, 1- jogo, 2- tela final
+int estadoJogo[4] = {}; // descreve o estado das configuracoes do jogo selecionadas no menu
 Tetris jogo(10);
-int estadoJogo[4] = {}; // descreve o estado
+Tetris jogoComPecaCaindo(10);
 
 void iniciaRetangulos()
 {
@@ -253,16 +256,53 @@ void desenhaQuadrado(int x, int y, double tam, bool preenchido)
   glLoadIdentity();
 }
 
-// void 
+// void desenhaJogo(int altura, int largura) {
 
-void displayJogo()
+// }
+
+void atualizaJogo(int altura, int largura)
+{
+  const int possiveisRotacoes[] = {0, 90, 180, 270};
+  jogoComPecaCaindo = jogo;
+  int alturaMaximaJogo = altura;
+  int larguraJogo = largura;
+
+  int alturaPecaAtual = alturaMaximaJogo;
+  char idPecaAtual;
+  int posicaoPecaAtual, rotacaoPecaAtual;
+
+  idPecaAtual = "IJLOSTZ"[rand() % 7];
+  posicaoPecaAtual = larguraJogo / 2 - 2;
+  alturaPecaAtual = alturaMaximaJogo;
+  rotacaoPecaAtual = 0;
+
+  jogoComPecaCaindo = jogo;
+
+  if (jogoComPecaCaindo.adicionaForma(posicaoPecaAtual, alturaPecaAtual - 1, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
+  {
+    alturaPecaAtual--;
+  }
+  else
+  {
+    jogo.adicionaForma(posicaoPecaAtual, alturaPecaAtual, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]);
+    jogoComPecaCaindo = jogo;
+
+    idPecaAtual = "IJLOSTZ"[rand() % 7];
+    posicaoPecaAtual = larguraJogo / 2 - 2;
+    alturaPecaAtual = alturaMaximaJogo;
+    rotacaoPecaAtual = rand() % 4;
+    jogoComPecaCaindo.removeLinhasCompletas();
+    jogo = jogoComPecaCaindo;
+  }
+}
+
+void displayJogo(int value)
 {
   janelaAtiva = 1;
   glClear(GL_COLOR_BUFFER_BIT);
   glLoadIdentity();
   int altura;
   int largura;
-  jogo.adicionaForma(4, 4, 'I', 0);
 
   if (estadoJogo[1] == 0)
   {
@@ -283,19 +323,25 @@ void displayJogo()
   int posinicialy = -300;
   double tam = 300 / largura;
 
+  atualizaJogo(altura, largura);
+
+  glClear(GL_COLOR_BUFFER_BIT);
+
   for (int i = 0; i < largura; i++) // i = x = largura
   {
     for (int j = 0; j < altura; j++) // j = y = altura
     {
-      if (jogo.get(i, j) != ' ')
+      if (jogoComPecaCaindo.get(i, j) != ' ')
+      {
         desenhaQuadrado(i * tam + posinicialx, j * tam + posinicialy, tam, true);
+      }
       else
+      {
         desenhaQuadrado(i * tam + posinicialx, j * tam + posinicialy, tam, false);
+      }
     }
   }
-
-  glutPostRedisplay();
-  glutTimerFunc(100, displayJogo, 1);
+  glutTimerFunc(1000, displayJogo, 1);
 }
 
 void displayMenu();
@@ -309,7 +355,7 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
     case (unsigned char)13: // tecla ENTER
       if (atual == 0)
       {
-        displayJogo();
+        displayJogo(1);
       }
       if (atual == 1)
       {
@@ -396,8 +442,10 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
       }
     }
   }
-  else if(janelaAtiva == 1) {
-    if(key == (unsigned char)27) {
+  else if (janelaAtiva == 1)
+  {
+    if (key == (unsigned char)27)
+    {
       displayMenu();
     }
   }
@@ -414,13 +462,13 @@ void displayMenu()
 
   // Desenha Eixos
   // glLineWidth(1);
-  glBegin(GL_LINES);
-  glColor3f(0, 0, 0);
-  glVertex2f(300, 0);
-  glVertex2f(-300, 0);
-  glVertex2f(0, -300);
-  glVertex2f(0, 300);
-  glEnd();
+  // glBegin(GL_LINES);
+  // glColor3f(0, 0, 0);
+  // glVertex2f(300, 0);
+  // glVertex2f(-300, 0);
+  // glVertex2f(0, -300);
+  // glVertex2f(0, 300);
+  // glEnd();
 
   glPolygonMode(GL_FRONT, GL_FILL);
 
@@ -449,7 +497,7 @@ void display(void)
   if (janelaAtiva == 1)
   {
     glutSwapBuffers();
-    displayJogo();
+    displayJogo(1);
   }
 }
 
@@ -465,6 +513,7 @@ int main(int argc, char **argv)
   glutKeyboardFunc(handle_key_menu);
   glutSpecialFunc(handle_arrow_key_menu);
   glutDisplayFunc(display);
+  glutTimerFunc(1000, displayJogo, 1);
 
   glutMainLoop();
   return 0;

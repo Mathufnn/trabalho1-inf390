@@ -15,6 +15,9 @@ class Tetris {
 		int getAltura(int c) const {return alturas[c];}
 		bool adicionaForma(int posicao,int altura,char id, int rotacao);
 		char get(int coluna, int linha) const;
+		
+		void criaJogo(int larguraJogo, int alturaMaximaJogo);
+		void atualizaJogo();
 
 		~Tetris();
 		Tetris(const Tetris &);

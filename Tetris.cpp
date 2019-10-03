@@ -313,3 +313,9 @@ std::ostream &operator<<(std::ostream &out,const Tetris&t) {
 
 	return out;
 }
+
+// void Tetris::atualizaJogo() {
+// 	const int possiveisRotacoes[] = {0,90,180,270};
+// 	// Tetris jogo(10);
+// 	// Tetris jogoComPecaCaindo(10);
+// }
