@@ -83,7 +83,7 @@ void Tetris::removeLinhaCompleta(int l) {
 }
 
 void Tetris::removeLinhasCompletas() {
-	int alturaMaxima = gettAltura();
+	int alturaMaxima = getAltura();
 	for(int i=0;i<alturaMaxima;i++) {
 		if(linhaEstaCompleta(i)) {
 			removeLinhaCompleta(i);

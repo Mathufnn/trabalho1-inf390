@@ -1,9 +1,10 @@
-#include <GL/glut.h>
 #include <iostream>
-using namespace std;
+#include <string>
+#include <GL/glut.h>
 #include <GL/freeglut.h>
 #include "INF390.h"
-#include <string>
+#include "Tetris.h"
+using namespace std;
 
 struct retangulo
 {
@@ -15,6 +16,9 @@ struct retangulo
 
 retangulo vet[13];
 int atual = 0;
+int janelaAtiva = 0; // 0 - menu, 1- jogo, 2- tela final
+Tetris jogo(10);
+int estadoJogo[4] = {}; // descreve o estado
 
 void iniciaRetangulos()
 {
@@ -135,190 +139,288 @@ void INF390::texto(const std::string &texto, int x, int y, double tamanhoX, doub
   glPopMatrix();
 }
 
-void handle_arrow_key(int key, int x, int y)
+void handle_arrow_key_menu(int key, int x, int y)
 {
   switch (key)
   {
   case GLUT_KEY_UP:
-    if(atual == 1 || atual == 2 || atual == 3)
+    if (atual == 1 || atual == 2 || atual == 3)
     {
       vet[atual].estado--;
       vet[0].estado++;
       atual = 0;
     }
-
-
-    if(atual == 4 || atual == 5 || atual == 6 || atual == 7 || atual == 8 || atual == 9)
+    if (atual == 4 || atual == 5 || atual == 6 || atual == 7 || atual == 8 || atual == 9)
     {
       vet[atual].estado--;
-      vet[atual-3].estado++;
+      vet[atual - 3].estado++;
       atual -= 3;
     }
-    else if(atual == 10 || atual == 11)
+    else if (atual == 10 || atual == 11)
     {
       vet[atual].estado--;
-      vet[atual-2].estado++;
+      vet[atual - 2].estado++;
       atual -= 2;
     }
-    else if(atual == 12)
+    else if (atual == 12)
     {
       vet[atual].estado--;
-      vet[atual-1].estado++;
+      vet[atual - 1].estado++;
       atual--;
     }
-    cout << "atual: " << atual << endl;
     break;
 
   case GLUT_KEY_DOWN:
     if (atual == 0)
     {
       vet[atual].estado--;
-      vet[atual+1].estado++;
+      vet[atual + 1].estado++;
       atual = 1;
     }
-    else if(atual == 1 || atual == 2 || atual == 3 || atual == 4 || atual == 5 || atual == 6 
-    || atual == 7 || atual == 8)
+    else if (atual == 1 || atual == 2 || atual == 3 || atual == 4 || atual == 5 || atual == 6 || atual == 7 || atual == 8)
     {
       vet[atual].estado--;
-      vet[atual+3].estado++;
+      vet[atual + 3].estado++;
       atual += 3;
     }
-    else if(atual == 9 || atual == 10)
+    else if (atual == 9 || atual == 10)
     {
       vet[atual].estado--;
-      vet[atual+2].estado++;
+      vet[atual + 2].estado++;
       atual += 2;
     }
-    else if(atual == 11)
+    else if (atual == 11)
     {
       vet[11].estado--;
       vet[12].estado++;
       atual = 12;
     }
-    cout << "atual: " << atual << endl;
     break;
 
   case GLUT_KEY_LEFT:
     if (atual == 2 || atual == 3 || atual == 5 || atual == 6 || atual == 8 || atual == 9 || atual == 11)
     {
       vet[atual].estado--;
-      vet[atual-1].estado++;
+      vet[atual - 1].estado++;
       atual--;
     }
-    cout << "atual: " << atual << endl;
     break;
 
   case GLUT_KEY_RIGHT:
     if (atual == 1 || atual == 2 || atual == 4 || atual == 5 || atual == 7 || atual == 8 || atual == 10)
     {
       vet[atual].estado--;
-      vet[atual+1].estado++;
+      vet[atual + 1].estado++;
       atual++;
     }
-    cout << "atual: " << atual << endl;
     break;
   }
 
   glutPostRedisplay();
 }
 
-void handle_key(unsigned char key, int mousex, int mousey)
+void init(void)
 {
-  switch (key)
+  glClearColor(1.0, 1.0, 1.0, 1.0);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluOrtho2D(-300.0, 300.0, -300.0, 300.0);
+}
+
+void desenhaQuadrado(int x, int y, double tam, bool preenchido)
+{
+  glTranslatef(x, y, 0);
+  glColor3f(1, 0, 0);
+  if (!preenchido)
   {
-    case (unsigned char)13:     // tecla ENTER
-      if(atual == 1)
+    glBegin(GL_LINE_LOOP);
+    glVertex2d(0, 0);
+    glVertex2d(0, tam);
+    glVertex2d(tam, tam);
+    glVertex2d(tam, 0);
+    glEnd();
+  }
+  else
+  {
+    glBegin(GL_POLYGON);
+    glVertex2d(0, 0);
+    glVertex2d(0, tam);
+    glVertex2d(tam, tam);
+    glVertex2d(tam, 0);
+    glEnd();
+  }
+  glLoadIdentity();
+}
+
+// void 
+
+void displayJogo()
+{
+  janelaAtiva = 1;
+  glClear(GL_COLOR_BUFFER_BIT);
+  glLoadIdentity();
+  int altura;
+  int largura;
+  jogo.adicionaForma(4, 4, 'I', 0);
+
+  if (estadoJogo[1] == 0)
+  {
+    altura = 20;
+    largura = 10;
+  }
+  else if (estadoJogo[1] == 1)
+  {
+    altura = 30;
+    largura = 15;
+  }
+  else if (estadoJogo[1] == 2)
+  {
+    altura = 50;
+    largura = 25;
+  }
+  int posinicialx = -150;
+  int posinicialy = -300;
+  double tam = 300 / largura;
+
+  for (int i = 0; i < largura; i++) // i = x = largura
+  {
+    for (int j = 0; j < altura; j++) // j = y = altura
+    {
+      if (jogo.get(i, j) != ' ')
+        desenhaQuadrado(i * tam + posinicialx, j * tam + posinicialy, tam, true);
+      else
+        desenhaQuadrado(i * tam + posinicialx, j * tam + posinicialy, tam, false);
+    }
+  }
+
+  glutPostRedisplay();
+  glutTimerFunc(100, displayJogo, 1);
+}
+
+void displayMenu();
+
+void handle_key_menu(unsigned char key, int mousex, int mousey)
+{
+  if (janelaAtiva == 0)
+  {
+    switch (key)
+    {
+    case (unsigned char)13: // tecla ENTER
+      if (atual == 0)
+      {
+        displayJogo();
+      }
+      if (atual == 1)
       {
         vet[atual].estado = 4;
         vet[2].estado = 1;
-        vet[3].estado = 1; 
+        vet[3].estado = 1;
+        estadoJogo[0] = 0;
       }
-      else if(atual == 2)
+      else if (atual == 2)
       {
         vet[atual].estado = 4;
         vet[1].estado = 1;
         vet[3].estado = 1;
+        estadoJogo[0] = 1;
       }
-      else if(atual == 3)
+      else if (atual == 3)
       {
         vet[atual].estado = 4;
         vet[1].estado = 1;
         vet[2].estado = 1;
+        estadoJogo[0] = 2;
       }
 
-      else if(atual == 4)
+      else if (atual == 4)
       {
         vet[atual].estado = 4;
         vet[5].estado = 1;
         vet[6].estado = 1;
+        estadoJogo[1] = 0;
       }
-      else if(atual == 5)
+      else if (atual == 5)
       {
         vet[atual].estado = 4;
         vet[4].estado = 1;
         vet[6].estado = 1;
+        estadoJogo[1] = 1;
       }
-      else if(atual == 6)
+      else if (atual == 6)
       {
         vet[atual].estado = 4;
         vet[4].estado = 1;
         vet[5].estado = 1;
+        estadoJogo[1] = 2;
       }
 
-      else if(atual == 7)
+      else if (atual == 7)
       {
         vet[atual].estado = 4;
         vet[8].estado = 1;
         vet[9].estado = 1;
+        estadoJogo[2] = 0;
       }
-      else if(atual == 8)
+      else if (atual == 8)
       {
         vet[atual].estado = 4;
         vet[7].estado = 1;
         vet[9].estado = 1;
+        estadoJogo[2] = 1;
       }
-      else if(atual == 9)
+      else if (atual == 9)
       {
         vet[atual].estado = 4;
         vet[7].estado = 1;
         vet[8].estado = 1;
+        estadoJogo[2] = 2;
       }
 
-      else if(atual == 10)
+      else if (atual == 10)
       {
         vet[atual].estado = 4;
         vet[11].estado = 1;
+        estadoJogo[3] = 0;
       }
-      else if(atual == 11)
+      else if (atual == 11)
       {
         vet[atual].estado = 4;
         vet[10].estado = 1;
+        estadoJogo[3] = 1;
       }
 
-      else if(atual == 12)
+      else if (atual == 12)
       {
-        exit(0);   // FECHAR
+        exit(0); // FECHAR
       }
+    }
+  }
+  else if(janelaAtiva == 1) {
+    if(key == (unsigned char)27) {
+      displayMenu();
+    }
   }
 
   glutPostRedisplay();
 }
 
-void display(void)
+void displayMenu()
 {
+  janelaAtiva = 0;
   glClear(GL_COLOR_BUFFER_BIT);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  //Desenha Eixos
+  // Desenha Eixos
   // glLineWidth(1);
-  // glBegin(GL_LINES);
-  // glColor3f(0, 0, 0);
-  // glVertex2f(300, 0);
-  // glVertex2f(-300, 0);
-  // glVertex2f(0, -300);
-  // glVertex2f(0, 300);
-  // glEnd();
+  glBegin(GL_LINES);
+  glColor3f(0, 0, 0);
+  glVertex2f(300, 0);
+  glVertex2f(-300, 0);
+  glVertex2f(0, -300);
+  glVertex2f(0, 300);
+  glEnd();
 
   glPolygonMode(GL_FRONT, GL_FILL);
 
@@ -334,15 +436,21 @@ void display(void)
   INF390::texto("MODO:", -50, -30, 0.13, 0.13);
 
   glFlush();
+  return;
 }
 
-void init(void)
+void display(void)
 {
-  glClearColor(1.0, 1.0, 1.0, 1.0);
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluOrtho2D(-300.0, 300.0, -300.0, 300.0);
+  if (janelaAtiva == 0)
+  {
+    glutSwapBuffers();
+    displayMenu();
+  }
+  if (janelaAtiva == 1)
+  {
+    glutSwapBuffers();
+    displayJogo();
+  }
 }
 
 int main(int argc, char **argv)
@@ -351,11 +459,11 @@ int main(int argc, char **argv)
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
   glutInitWindowSize(600, 600);
   glutInitWindowPosition(200, 100);
-  glutCreateWindow("Transformacoes 2D");
+  glutCreateWindow("Menu do Tetris");
   iniciaRetangulos();
   init();
-  glutKeyboardFunc(handle_key);
-  glutSpecialFunc(handle_arrow_key);
+  glutKeyboardFunc(handle_key_menu);
+  glutSpecialFunc(handle_arrow_key_menu);
   glutDisplayFunc(display);
 
   glutMainLoop();
