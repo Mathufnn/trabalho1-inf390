@@ -16,12 +16,29 @@ struct retangulo
   string texto = "";
 };
 
+	int ultimaTecla = -1;
+
+
 retangulo vet[13];
 int atual = 0;
 int janelaAtiva = 0;    // 0 - menu, 1- jogo, 2- tela final
 int estadoJogo[4] = {}; // descreve o estado das configuracoes do jogo selecionadas no menu
-Tetris jogo(10);
-Tetris jogoComPecaCaindo(10);
+	const int possiveisRotacoes[] = {0, 90, 180, 270};
+ int larguraJogo;
+	int alturaMaximaJogo;
+	Tetris jogoComPecaCaindo(0);
+  Tetris jogo(0);
+
+	int alturaPecaAtual;
+	char idPecaAtual = "IJLOSTZ"[rand() % 7];
+	int posicaoPecaAtual;
+  int rotacaoPecaAtual =0;
+  int altura_n,posicao_n;
+  bool primeiro = false;
+
+
+
+
 
 void iniciaRetangulos()
 {
@@ -144,6 +161,8 @@ void INF390::texto(const std::string &texto, int x, int y, double tamanhoX, doub
 
 void handle_arrow_key_menu(int key, int x, int y)
 {
+
+  if  (janelaAtiva==0){
   switch (key)
   {
   case GLUT_KEY_UP:
@@ -218,7 +237,37 @@ void handle_arrow_key_menu(int key, int x, int y)
     }
     break;
   }
+  }
 
+
+    else if (janelaAtiva == 1)
+  {
+
+
+    switch (key)
+    {
+      case GLUT_KEY_LEFT:
+      {
+      
+        ultimaTecla=0;
+        break;
+      }
+
+
+        case GLUT_KEY_RIGHT:
+        {
+                  ultimaTecla=1;
+          break;
+        }
+
+
+        case GLUT_KEY_UP:
+        {
+                ultimaTecla=2;
+        break;
+        }
+    }
+  }
   glutPostRedisplay();
 }
 
@@ -254,6 +303,9 @@ void desenhaQuadrado(int x, int y, double tam, bool preenchido)
     glEnd();
   }
   glLoadIdentity();
+  glutSwapBuffers();
+
+
 }
 
 // void desenhaJogo(int altura, int largura) {
@@ -262,38 +314,68 @@ void desenhaQuadrado(int x, int y, double tam, bool preenchido)
 
 void atualizaJogo(int altura, int largura)
 {
-  const int possiveisRotacoes[] = {0, 90, 180, 270};
-  jogoComPecaCaindo = jogo;
-  int alturaMaximaJogo = altura;
-  int larguraJogo = largura;
 
-  int alturaPecaAtual = alturaMaximaJogo;
-  char idPecaAtual;
-  int posicaoPecaAtual, rotacaoPecaAtual;
 
-  idPecaAtual = "IJLOSTZ"[rand() % 7];
-  posicaoPecaAtual = larguraJogo / 2 - 2;
-  alturaPecaAtual = alturaMaximaJogo;
-  rotacaoPecaAtual = 0;
 
   jogoComPecaCaindo = jogo;
+  
+  cout << ultimaTecla << endl;
 
-  if (jogoComPecaCaindo.adicionaForma(posicaoPecaAtual, alturaPecaAtual - 1, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
-  {
-    alturaPecaAtual--;
-  }
-  else
-  {
-    jogo.adicionaForma(posicaoPecaAtual, alturaPecaAtual, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]);
-    jogoComPecaCaindo = jogo;
+	  if(ultimaTecla == 0)
+		{ 
+			Tetris jogoTeste = jogoComPecaCaindo;
+			if (jogoTeste.adicionaForma(posicaoPecaAtual - 1, alturaPecaAtual, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
+				posicaoPecaAtual--;
+        ultimaTecla = -1;
+		}
 
-    idPecaAtual = "IJLOSTZ"[rand() % 7];
-    posicaoPecaAtual = larguraJogo / 2 - 2;
-    alturaPecaAtual = alturaMaximaJogo;
-    rotacaoPecaAtual = rand() % 4;
-    jogoComPecaCaindo.removeLinhasCompletas();
-    jogo = jogoComPecaCaindo;
-  }
+  
+		else if (ultimaTecla == 1)
+		{
+			Tetris jogoTeste = jogoComPecaCaindo;
+			if (jogoTeste.adicionaForma(posicaoPecaAtual + 1, alturaPecaAtual, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
+				posicaoPecaAtual++;
+                ultimaTecla = -1;
+
+		}
+
+
+		else if (ultimaTecla == 2)
+		{ //a tecla de espaco e' utilizada para rodar a peca...
+			Tetris jogoTeste = jogoComPecaCaindo;
+			if (jogoTeste.adicionaForma(posicaoPecaAtual, alturaPecaAtual, idPecaAtual, possiveisRotacoes[(rotacaoPecaAtual + 1) % 4]))
+				rotacaoPecaAtual = (rotacaoPecaAtual + 1) % 4;
+                ultimaTecla = -1;
+
+		}
+
+		//Antes de diminuirmos a altura de uma peca, tentamos adiciona-la nessa nova altura
+		// Se a funcao retornar true --> significa que podemos diminuir
+		// Senao --> isso significa que apeca colidiria (ocuparia o mesmo espaco que) com alguma peca fixa --> a peca devera parar na altura anterior
+		// e uma nova peca deve comecar a cair
+		if (jogoComPecaCaindo.adicionaForma(posicaoPecaAtual, alturaPecaAtual - 1, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
+		{
+			alturaPecaAtual--;
+		}
+		else
+		{
+			//adiciona a peca a posicao onde ela ficara fixada
+			jogo.adicionaForma(posicaoPecaAtual, alturaPecaAtual, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]);
+			jogoComPecaCaindo = jogo;
+
+			//sorteia uma nova peca, define a altura como sendo o topo da tela, etc...
+			idPecaAtual = "IJLOSTZ"[rand() % 7];
+			posicaoPecaAtual = larguraJogo / 2 - 2;
+			alturaPecaAtual = alturaMaximaJogo;
+			rotacaoPecaAtual = rand() % 4;
+			jogoComPecaCaindo.removeLinhasCompletas();
+			jogo = jogoComPecaCaindo;
+		}
+
+  altura_n = alturaPecaAtual;
+  posicao_n= posicaoPecaAtual;
+
+
 }
 
 void displayJogo(int value)
@@ -303,6 +385,11 @@ void displayJogo(int value)
   glLoadIdentity();
   int altura;
   int largura;
+
+
+
+
+
 
   if (estadoJogo[1] == 0)
   {
@@ -319,6 +406,21 @@ void displayJogo(int value)
     altura = 50;
     largura = 25;
   }
+
+  if (primeiro == false){
+    Tetris jogo2(largura);
+    jogo = jogo2;
+      larguraJogo = largura;
+  alturaMaximaJogo=altura;
+  alturaPecaAtual=alturaMaximaJogo;
+    posicaoPecaAtual = larguraJogo / 2 - 2;
+
+    primeiro = true;
+
+  }
+  
+
+
   int posinicialx = -150;
   int posinicialy = -300;
   double tam = 300 / largura;
@@ -327,24 +429,35 @@ void displayJogo(int value)
 
   glClear(GL_COLOR_BUFFER_BIT);
 
-  for (int i = 0; i < largura; i++) // i = x = largura
-  {
-    for (int j = 0; j < altura; j++) // j = y = altura
+
+
+
+
+
+    for (int i = 0; i < largura; i++) // i = x = largura
     {
-      if (jogoComPecaCaindo.get(i, j) != ' ')
+      for (int j = 0; j < altura; j++) // j = y = altura
       {
-        desenhaQuadrado(i * tam + posinicialx, j * tam + posinicialy, tam, true);
+        if (jogoComPecaCaindo.get(i, j) != ' ')
+        {
+          desenhaQuadrado(posicao_n * tam + posinicialx,altura_n * tam +posinicialy, tam, false);
+        }
+        else
+        {
+          desenhaQuadrado(i * tam +posinicialx , j * tam+posinicialy , tam, true);
+        }
       }
-      else
-      {
-        desenhaQuadrado(i * tam + posinicialx, j * tam + posinicialy, tam, false);
-      }
+
     }
-  }
-  glutTimerFunc(1000, displayJogo, 1);
+    
+    
+
+
+glutTimerFunc(100000.0/60.0, displayJogo, 0);
+
+
 }
 
-void displayMenu();
 
 void handle_key_menu(unsigned char key, int mousex, int mousey)
 {
@@ -441,14 +554,16 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
         exit(0); // FECHAR
       }
     }
-  }
-  else if (janelaAtiva == 1)
-  {
-    if (key == (unsigned char)27)
-    {
-      displayMenu();
+  
     }
-  }
+  
+
+  
+        
+      
+  
+    
+  
 
   glutPostRedisplay();
 }
@@ -513,7 +628,6 @@ int main(int argc, char **argv)
   glutKeyboardFunc(handle_key_menu);
   glutSpecialFunc(handle_arrow_key_menu);
   glutDisplayFunc(display);
-  glutTimerFunc(1000, displayJogo, 1);
 
   glutMainLoop();
   return 0;
