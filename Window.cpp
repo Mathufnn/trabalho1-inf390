@@ -127,21 +127,11 @@ void desenhaRetangulo(int estado, double x, double y, const string &texto)
   glPushMatrix();
   if (estado == 1 || estado == 2)
   {
-    if (estadoJogo[2] == 0)
-      glColor3f(0, 1, 0);
-    else if (estadoJogo[2] == 1)
-      glColor3f(1, 0, 1);
-    else if (estadoJogo[2] == 2)
-      glColor3f(0.8, 0.2, 0.8);
+    glColor3f(0, 1, 0);
   }
   else if (estado == 3 || estado == 4)
   {
-    if (estadoJogo[2] == 0)
-      glColor3f(0, 0, 1);
-    else if (estadoJogo[2] == 1)
-      glColor3f(1, 1, 0);
-    else if (estadoJogo[2] == 2)
-      glColor3f(0.2, 0.2, 0.8);
+    glColor3f(0, 0, 1);
   }
 
   glTranslatef(x, y, 0);
@@ -152,12 +142,7 @@ void desenhaRetangulo(int estado, double x, double y, const string &texto)
   glVertex2f(100.0, 0.0);
   glEnd();
 
-  if (estadoJogo[2] == 0)
-    glColor3f(1, 0, 0);
-  else if (estadoJogo[2] == 1)
-    glColor3f(0, 1, 1);
-  else if (estadoJogo[2] == 2)
-    glColor3f(0.2, 0.8, 0.8);
+  glColor3f(1, 0, 0);
   INF390::texto(texto, x, y + 10, 0.13, 0.13);
   glLoadIdentity();
 
@@ -282,7 +267,6 @@ void handle_arrow_key_menu(int key, int x, int y)
     }
     //glutSwapBuffers();
   }
-
 }
 
 void init(void)
@@ -298,24 +282,36 @@ void desenhaQuadrado(int x, int y, double tam, bool preenchido)
 {
   glTranslatef(x, y, 0);
 
-  if (estadoJogo[2] == 0)
-    glColor3f(1, 0, 0);
-  else if (estadoJogo[2] == 1)
-    glColor3f(0, 1, 1);
-  else if (estadoJogo[2] == 2)
-    glColor3f(0.2, 0.8, 0.8);
+  // if (estadoJogo[2] == 0)
+  //   glColor3f(1, 0, 0);
+  // else if (estadoJogo[2] == 1)
+  //   glColor3f(0, 1, 1);
+  // else if (estadoJogo[2] == 2)
+  //   glColor3f(0.2, 0.8, 0.8);
 
-  if (!preenchido)
+  if (!preenchido) // desenha fundo
   {
-    glBegin(GL_LINE_LOOP);
+    if (estadoJogo[2] == 0)
+      glColor3f(1, 0, 0);
+    else if (estadoJogo[2] == 1)
+      glColor3f(0, 1, 1);
+    else if (estadoJogo[2] == 2)
+      glColor3f(0, 0, 1);
+    glBegin(GL_POLYGON);
     glVertex2d(0, 0);
     glVertex2d(0, tam);
     glVertex2d(tam, tam);
     glVertex2d(tam, 0);
     glEnd();
   }
-  else
+  else // desenha peca
   {
+    if (estadoJogo[2] == 0)
+      glColor3f(0, 1, 0);
+    else if (estadoJogo[2] == 1)
+      glColor3f(1, 0, 0);
+    else if (estadoJogo[2] == 2)
+      glColor3f(1, 0, 0);
     glBegin(GL_POLYGON);
     glVertex2d(0, 0);
     glVertex2d(0, tam);
@@ -445,6 +441,7 @@ void displayJogo(int value)
 
     glutTimerFunc(1000, displayJogo, 0);
     glutSwapBuffers();
+
   }
 }
 
@@ -597,7 +594,7 @@ void reshape(int w, int h)
   glViewport((w - 600) / 2 - ((h - 600) / 2), 0, (GLsizei)h, (GLsizei)h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluOrtho2D(-300, 300,-300, 300);
+  gluOrtho2D(-300, 300, -300, 300);
 }
 
 void display(void)
