@@ -411,6 +411,10 @@ void displayJogo(int value)
       largura = 25;
     }
 
+     alturaMaximaJogo = altura;
+
+    double tam = 300 / largura;
+
     if (primeiro == false)
     {
       idPecaAtual = "IJLOSTZ"[rand() % 7];
@@ -423,9 +427,7 @@ void displayJogo(int value)
       primeiro = true;
     }
 
-    alturaMaximaJogo = altura;
-
-    double tam = 300 / largura;
+   
     atualizaJogo();
 
     for (int i = 0; i < largura; i++) // i = x = largura
@@ -448,7 +450,7 @@ void displayJogo(int value)
   }
 }
 
-void displayMenu()
+void displayMenu(int value)
 {
   janelaAtiva = 0;
   glClear(GL_COLOR_BUFFER_BIT);
@@ -585,8 +587,8 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
 
       executa = 0;
       primeiro = false;
-      displayMenu();
-      //glutPostRedisplay();
+          glutTimerFunc(1000, displayMenu, 0);
+
       break;
     }
   }
@@ -604,7 +606,9 @@ void display(void)
 {
   if (janelaAtiva == 0)
   {
-    displayMenu();
+
+    displayMenu(1);
+
   }
   if (janelaAtiva == 1)
   {
