@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
+
 using namespace std;
 
 struct retangulo
@@ -19,7 +20,7 @@ struct retangulo
 
 	int ultimaTecla = -1;
 
-
+  int executa = 1;
   retangulo vet[13];
   int atual = 0;
   int janelaAtiva = 0;    // 0 - menu, 1- jogo, 2- tela final
@@ -165,7 +166,6 @@ void INF390::texto(const std::string &texto, int x, int y, double tamanhoX, doub
 
 void handle_arrow_key_menu(int key, int x, int y)
 {
-
   if  (janelaAtiva==0){
   switch (key)
   {
@@ -267,15 +267,10 @@ void handle_arrow_key_menu(int key, int x, int y)
           break;
         }
 
-    
-        case GLUT_KEY_DOWN:
-        {
-          ultimaTecla = 3;
-        }
-
+  
       
     }
-      glutSwapBuffers();
+      //glutSwapBuffers();
 
   }
   
@@ -293,22 +288,34 @@ void init(void)
 void desenhaQuadrado(int x, int y, double tam, bool preenchido)
 {
   glTranslatef(x, y, 0);
-  glColor3f(1, 0, 0);
+  glColor3f(0, 1, 0);
+
   if (!preenchido)
   {
+
     glBegin(GL_LINE_LOOP);
+    
     glVertex2d(0, 0);
+
     glVertex2d(0, tam);
+
     glVertex2d(tam, tam);
+
     glVertex2d(tam, 0);
     glEnd();
   }
   else
   {
+
     glBegin(GL_POLYGON);
+ 
+
     glVertex2d(0, 0);
+
     glVertex2d(0, tam);
+
     glVertex2d(tam, tam);
+
     glVertex2d(tam, 0);
     glEnd();
   }
@@ -358,6 +365,10 @@ void atualizaJogo()
 
 		}
 
+    
+
+
+    
    
 		//Antes de diminuirmos a altura de uma peca, tentamos adiciona-la nessa nova altura
 		// Se a funcao retornar true --> significa que podemos diminuir
@@ -383,9 +394,6 @@ void atualizaJogo()
 			jogo = jogoComPecaCaindo;
     }
 		
-
-
-
 }
 
 void displayJogo(int value)
@@ -394,6 +402,7 @@ void displayJogo(int value)
   glClear(GL_COLOR_BUFFER_BIT);
   glLoadIdentity();
   
+  if (executa !=0){
 
   if (estadoJogo[1] == 0)
   {
@@ -412,6 +421,7 @@ void displayJogo(int value)
   }
 
   if (primeiro == false){
+    idPecaAtual = "IJLOSTZ"[rand() % 7];
     Tetris jogo2(largura);
     jogo = jogo2;
       larguraJogo = largura;
@@ -428,8 +438,8 @@ void displayJogo(int value)
 
  
   double tam = 300 / largura;
-
   atualizaJogo();
+
 
     for (int i = 0; i < largura; i++) // i = x = largura
     {
@@ -437,26 +447,53 @@ void displayJogo(int value)
       {
         if (jogoComPecaCaindo.get(i, j) != ' ')
         {
-          desenhaQuadrado(posicaoPecaAtual* tam + posinicialx,alturaPecaAtual * tam +posinicialy, tam, false);
+          desenhaQuadrado(i* tam + posinicialx,j* tam +posinicialy, tam, true);
         }
         else
         {
-          desenhaQuadrado(i * tam +posinicialx , j * tam+posinicialy , tam, true);
+          desenhaQuadrado(i * tam +posinicialx , j * tam+posinicialy , tam, false);
         }
       }
-      
-
     }
-  glutSwapBuffers();
-  glutTimerFunc(1000, displayJogo, 1);
 
+  glutTimerFunc(1000, displayJogo, 0);
+      glutSwapBuffers();
+
+  }
+
+  
 
 }
 
 
+void displayMenu()
+{
+  janelaAtiva = 0;
+  glClear(GL_COLOR_BUFFER_BIT);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  glPolygonMode(GL_FRONT, GL_FILL);
+
+  for (int i = 0; i < 13; i++)
+  {
+    desenhaRetangulo(vet[i].estado, vet[i].x, vet[i].y, vet[i].texto);
+  }
+
+  glColor3f(1.0f, 0.0f, 0.0f);
+  INF390::texto("VELOCIDADE:", -50, 210, 0.13, 0.13);
+  INF390::texto("TAMANHO:", -50, 130, 0.13, 0.13);
+  INF390::texto("CORES:", -50, 50, 0.13, 0.13);
+  INF390::texto("MODO:", -50, -30, 0.13, 0.13);
+
+  glFlush();
+  
+}
+
+
+
 void handle_key_menu(unsigned char key, int mousex, int mousey)
 {
-      cout << janelaAtiva;
 
 
   if (janelaAtiva == 0)
@@ -466,6 +503,7 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
     case (unsigned char)13: // tecla ENTER
       if (atual == 0)
       {
+        executa =1;
         displayJogo(1);
       }
       if (atual == 1)
@@ -551,7 +589,7 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
       {
         exit(0); // FECHAR
       }
-        glutPostRedisplay();
+        //glutPostRedisplay();
 
     }}
 
@@ -561,51 +599,39 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
         case ' ':
 
           ultimaTecla=2;
+
         break;
-      }
-    glutSwapBuffers();
+      
+      case (unsigned char)27:
+      
+      executa = 0;
+      primeiro = false;
+      displayMenu();    
+      //glutPostRedisplay();
+        break;
+      
+
 
     }
     }
+}
   
 
 
-void displayMenu()
-{
-  janelaAtiva = 0;
-  glClear(GL_COLOR_BUFFER_BIT);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  glPolygonMode(GL_FRONT, GL_FILL);
-
-  for (int i = 0; i < 13; i++)
-  {
-    desenhaRetangulo(vet[i].estado, vet[i].x, vet[i].y, vet[i].texto);
-  }
-
-  glColor3f(1.0f, 0.0f, 0.0f);
-  INF390::texto("VELOCIDADE:", -50, 210, 0.13, 0.13);
-  INF390::texto("TAMANHO:", -50, 130, 0.13, 0.13);
-  INF390::texto("CORES:", -50, 50, 0.13, 0.13);
-  INF390::texto("MODO:", -50, -30, 0.13, 0.13);
-
-  glFlush();
-  return;
-}
 
 void display(void)
 {
   if (janelaAtiva == 0)
   {
-    glutSwapBuffers();
-    displayMenu();
+  displayMenu();
   }
   if (janelaAtiva == 1)
   {
-    glutSwapBuffers();
     displayJogo(1);
   }
+
+
+  
 }
 
 int main(int argc, char **argv)
