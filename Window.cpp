@@ -6,6 +6,7 @@
 #include "Tetris.h"
 #include <chrono>
 #include <thread>
+#include <unistd.h>
 using namespace std;
 
 struct retangulo
@@ -19,10 +20,10 @@ struct retangulo
 	int ultimaTecla = -1;
 
 
-retangulo vet[13];
-int atual = 0;
-int janelaAtiva = 0;    // 0 - menu, 1- jogo, 2- tela final
-int estadoJogo[4] = {}; // descreve o estado das configuracoes do jogo selecionadas no menu
+  retangulo vet[13];
+  int atual = 0;
+  int janelaAtiva = 0;    // 0 - menu, 1- jogo, 2- tela final
+  int estadoJogo[4] = {}; // descreve o estado das configuracoes do jogo selecionadas no menu
 	const int possiveisRotacoes[] = {0, 90, 180, 270};
  int larguraJogo;
 	int alturaMaximaJogo;
@@ -33,9 +34,12 @@ int estadoJogo[4] = {}; // descreve o estado das configuracoes do jogo seleciona
 	char idPecaAtual = "IJLOSTZ"[rand() % 7];
 	int posicaoPecaAtual;
   int rotacaoPecaAtual =0;
-  int altura_n,posicao_n;
-  bool primeiro = false;
+    bool primeiro = false;
+int altura;
+  int largura;
 
+   int posinicialx = -150;
+  int posinicialy = -300;
 
 
 
@@ -266,9 +270,17 @@ void handle_arrow_key_menu(int key, int x, int y)
                 ultimaTecla=2;
         break;
         }
+
+        case GLUT_KEY_DOWN:
+        {
+          ultimaTecla = 3;
+        }
+
+      
     }
   }
-  glutPostRedisplay();
+  glutSwapBuffers();
+  //glutPostRedisplay();
 }
 
 void init(void)
@@ -303,7 +315,6 @@ void desenhaQuadrado(int x, int y, double tam, bool preenchido)
     glEnd();
   }
   glLoadIdentity();
-  glutSwapBuffers();
 
 
 }
@@ -312,27 +323,27 @@ void desenhaQuadrado(int x, int y, double tam, bool preenchido)
 
 // }
 
-void atualizaJogo(int altura, int largura)
+void atualizaJogo()
 {
 
-
-
   jogoComPecaCaindo = jogo;
-  
-  cout << ultimaTecla << endl;
+
 
 	  if(ultimaTecla == 0)
 		{ 
-			Tetris jogoTeste = jogoComPecaCaindo;
+        			Tetris jogoTeste = jogoComPecaCaindo;
+
 			if (jogoTeste.adicionaForma(posicaoPecaAtual - 1, alturaPecaAtual, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
 				posicaoPecaAtual--;
         ultimaTecla = -1;
+
 		}
 
   
 		else if (ultimaTecla == 1)
 		{
-			Tetris jogoTeste = jogoComPecaCaindo;
+        			Tetris jogoTeste = jogoComPecaCaindo;
+
 			if (jogoTeste.adicionaForma(posicaoPecaAtual + 1, alturaPecaAtual, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
 				posicaoPecaAtual++;
                 ultimaTecla = -1;
@@ -342,17 +353,20 @@ void atualizaJogo(int altura, int largura)
 
 		else if (ultimaTecla == 2)
 		{ //a tecla de espaco e' utilizada para rodar a peca...
-			Tetris jogoTeste = jogoComPecaCaindo;
+      			Tetris jogoTeste = jogoComPecaCaindo;
+
 			if (jogoTeste.adicionaForma(posicaoPecaAtual, alturaPecaAtual, idPecaAtual, possiveisRotacoes[(rotacaoPecaAtual + 1) % 4]))
 				rotacaoPecaAtual = (rotacaoPecaAtual + 1) % 4;
                 ultimaTecla = -1;
 
 		}
 
+   
 		//Antes de diminuirmos a altura de uma peca, tentamos adiciona-la nessa nova altura
 		// Se a funcao retornar true --> significa que podemos diminuir
 		// Senao --> isso significa que apeca colidiria (ocuparia o mesmo espaco que) com alguma peca fixa --> a peca devera parar na altura anterior
 		// e uma nova peca deve comecar a cair
+
 		if (jogoComPecaCaindo.adicionaForma(posicaoPecaAtual, alturaPecaAtual - 1, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
 		{
 			alturaPecaAtual--;
@@ -370,10 +384,9 @@ void atualizaJogo(int altura, int largura)
 			rotacaoPecaAtual = rand() % 4;
 			jogoComPecaCaindo.removeLinhasCompletas();
 			jogo = jogoComPecaCaindo;
-		}
+    }
+		
 
-  altura_n = alturaPecaAtual;
-  posicao_n= posicaoPecaAtual;
 
 
 }
@@ -383,8 +396,7 @@ void displayJogo(int value)
   janelaAtiva = 1;
   glClear(GL_COLOR_BUFFER_BIT);
   glLoadIdentity();
-  int altura;
-  int largura;
+  
 
 
 
@@ -411,23 +423,21 @@ void displayJogo(int value)
     Tetris jogo2(largura);
     jogo = jogo2;
       larguraJogo = largura;
-  alturaMaximaJogo=altura;
   alturaPecaAtual=alturaMaximaJogo;
     posicaoPecaAtual = larguraJogo / 2 - 2;
 
     primeiro = true;
 
   }
-  
+  alturaMaximaJogo=altura;
 
 
-  int posinicialx = -150;
-  int posinicialy = -300;
+ 
   double tam = 300 / largura;
 
-  atualizaJogo(altura, largura);
+  atualizaJogo();
 
-  glClear(GL_COLOR_BUFFER_BIT);
+  //glClear(GL_COLOR_BUFFER_BIT);
 
 
 
@@ -440,20 +450,18 @@ void displayJogo(int value)
       {
         if (jogoComPecaCaindo.get(i, j) != ' ')
         {
-          desenhaQuadrado(posicao_n * tam + posinicialx,altura_n * tam +posinicialy, tam, false);
+          desenhaQuadrado(posicaoPecaAtual* tam + posinicialx,alturaPecaAtual * tam +posinicialy, tam, false);
         }
         else
         {
           desenhaQuadrado(i * tam +posinicialx , j * tam+posinicialy , tam, true);
         }
       }
+      
 
     }
-    
-    
-
-
-glutTimerFunc(100000.0/60.0, displayJogo, 0);
+  glutSwapBuffers();
+    glutTimerFunc(1000, displayJogo, 1);
 
 
 }
@@ -627,7 +635,10 @@ int main(int argc, char **argv)
   init();
   glutKeyboardFunc(handle_key_menu);
   glutSpecialFunc(handle_arrow_key_menu);
+  
   glutDisplayFunc(display);
+
+
 
   glutMainLoop();
   return 0;
