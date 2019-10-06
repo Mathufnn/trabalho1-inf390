@@ -241,6 +241,9 @@ void handle_arrow_key_menu(int key, int x, int y)
     }
     break;
   }
+      glutPostRedisplay();
+
+  
   }
 
 
@@ -264,13 +267,7 @@ void handle_arrow_key_menu(int key, int x, int y)
           break;
         }
 
-
-        case GLUT_KEY_UP:
-        {
-                ultimaTecla=2;
-        break;
-        }
-
+    
         case GLUT_KEY_DOWN:
         {
           ultimaTecla = 3;
@@ -278,9 +275,10 @@ void handle_arrow_key_menu(int key, int x, int y)
 
       
     }
+      glutSwapBuffers();
+
   }
-  glutSwapBuffers();
-  //glutPostRedisplay();
+  
 }
 
 void init(void)
@@ -325,7 +323,6 @@ void desenhaQuadrado(int x, int y, double tam, bool preenchido)
 
 void atualizaJogo()
 {
-
   jogoComPecaCaindo = jogo;
 
 
@@ -398,11 +395,6 @@ void displayJogo(int value)
   glLoadIdentity();
   
 
-
-
-
-
-
   if (estadoJogo[1] == 0)
   {
     altura = 20;
@@ -429,6 +421,8 @@ void displayJogo(int value)
     primeiro = true;
 
   }
+
+  
   alturaMaximaJogo=altura;
 
 
@@ -436,13 +430,6 @@ void displayJogo(int value)
   double tam = 300 / largura;
 
   atualizaJogo();
-
-  //glClear(GL_COLOR_BUFFER_BIT);
-
-
-
-
-
 
     for (int i = 0; i < largura; i++) // i = x = largura
     {
@@ -461,7 +448,7 @@ void displayJogo(int value)
 
     }
   glutSwapBuffers();
-    glutTimerFunc(1000, displayJogo, 1);
+  glutTimerFunc(1000, displayJogo, 1);
 
 
 }
@@ -469,6 +456,9 @@ void displayJogo(int value)
 
 void handle_key_menu(unsigned char key, int mousex, int mousey)
 {
+      cout << janelaAtiva;
+
+
   if (janelaAtiva == 0)
   {
     switch (key)
@@ -561,20 +551,24 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
       {
         exit(0); // FECHAR
       }
-    }
+        glutPostRedisplay();
+
+    }}
+
   
+    if (janelaAtiva == 1){
+      switch (key){
+        case ' ':
+
+          ultimaTecla=2;
+        break;
+      }
+    glutSwapBuffers();
+
+    }
     }
   
 
-  
-        
-      
-  
-    
-  
-
-  glutPostRedisplay();
-}
 
 void displayMenu()
 {
@@ -582,16 +576,6 @@ void displayMenu()
   glClear(GL_COLOR_BUFFER_BIT);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-
-  // Desenha Eixos
-  // glLineWidth(1);
-  // glBegin(GL_LINES);
-  // glColor3f(0, 0, 0);
-  // glVertex2f(300, 0);
-  // glVertex2f(-300, 0);
-  // glVertex2f(0, -300);
-  // glVertex2f(0, 300);
-  // glEnd();
 
   glPolygonMode(GL_FRONT, GL_FILL);
 
@@ -635,9 +619,8 @@ int main(int argc, char **argv)
   init();
   glutKeyboardFunc(handle_key_menu);
   glutSpecialFunc(handle_arrow_key_menu);
-  
+  //special serve pras setas, a keyboard pro ESC, Enter e espaço  
   glutDisplayFunc(display);
-
 
 
   glutMainLoop();
