@@ -1,8 +1,8 @@
-main.out: Tetris.o jogoTetris.o
-	g++ Tetris.o jogoTetris.o -lncurses
+make: Tetris.o Window.o
+	g++ Tetris.o Window.o -lglut -lGLU -lGL -o main.out
 
 Tetris.o:
 	g++ -c Tetris.cpp
 
 jogoTetris.o:
-	g++ -c jogoTetris.cpp
+	g++ -c Window.cpp
