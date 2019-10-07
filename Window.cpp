@@ -339,7 +339,7 @@ void displayPerdeu(int value)
 {
   glClear(GL_COLOR_BUFFER_BIT);
   glLoadIdentity();
-    glColor3f(1.0f, 0.0f, 0.0f);
+  glColor3f(1.0f, 0.0f, 0.0f);
 
   INF390::texto("VOCE PERDEU!", -50, 150, 0.13, 0.19);
   glutSwapBuffers();
@@ -419,6 +419,15 @@ void atualizaJogo()
   }
 }
 
+int contadorIteracoes = 0;
+void rotacionaTela(int value)
+{
+  glRotatef(30, 0, 0, 1);
+  cout << contadorIteracoes++ << endl;
+  glutTimerFunc(3000, rotacionaTela, 1);
+  glutPostRedisplay();
+}
+
 void displayJogo(int value)
 {
   if (!perdeu)
@@ -484,7 +493,7 @@ void displayJogo(int value)
   }
   if (perdeu == true)
   {
-    janelaAtiva=2;
+    janelaAtiva = 2;
     glutTimerFunc(500, displayPerdeu, 1);
 
     //glutPostRedisplay();    perdeu=false;
@@ -516,6 +525,107 @@ void displayMenu(int value)
   }
 }
 
+void trataSelecaoDeBotao(int atual)
+{
+  for (int i = 0; i < 13; i++)
+  {
+    if (vet[i].estado == 2 || vet[i].estado == 4)
+      vet[i].estado--;
+  }
+  if (atual == 0)
+  {
+    executa = 1;
+    janelaAtiva = 1;
+    perdeu = false;
+  }
+  if (atual == 1)
+  {
+    vet[atual].estado = 4;
+    vet[2].estado = 1;
+    vet[3].estado = 1;
+    estadoJogo[0] = 0;
+    velocidade = 600;
+  }
+  else if (atual == 2)
+  {
+    vet[atual].estado = 4;
+    vet[1].estado = 1;
+    vet[3].estado = 1;
+    estadoJogo[0] = 1;
+    velocidade = 200;
+  }
+  else if (atual == 3)
+  {
+    vet[atual].estado = 4;
+    vet[1].estado = 1;
+    vet[2].estado = 1;
+    estadoJogo[0] = 2;
+    velocidade = 70;
+  }
+
+  else if (atual == 4)
+  {
+    vet[atual].estado = 4;
+    vet[5].estado = 1;
+    vet[6].estado = 1;
+    estadoJogo[1] = 0;
+  }
+  else if (atual == 5)
+  {
+    vet[atual].estado = 4;
+    vet[4].estado = 1;
+    vet[6].estado = 1;
+    estadoJogo[1] = 1;
+  }
+  else if (atual == 6)
+  {
+    vet[atual].estado = 4;
+    vet[4].estado = 1;
+    vet[5].estado = 1;
+    estadoJogo[1] = 2;
+  }
+
+  else if (atual == 7)
+  {
+    vet[atual].estado = 4;
+    vet[8].estado = 1;
+    vet[9].estado = 1;
+    estadoJogo[2] = 0;
+  }
+  else if (atual == 8)
+  {
+    vet[atual].estado = 4;
+    vet[7].estado = 1;
+    vet[9].estado = 1;
+    estadoJogo[2] = 1;
+  }
+  else if (atual == 9)
+  {
+    vet[atual].estado = 4;
+    vet[7].estado = 1;
+    vet[8].estado = 1;
+    estadoJogo[2] = 2;
+  }
+
+  else if (atual == 10)
+  {
+    vet[atual].estado = 4;
+    vet[11].estado = 1;
+    estadoJogo[3] = 0;
+  }
+  else if (atual == 11)
+  {
+    vet[atual].estado = 4;
+    vet[10].estado = 1;
+    estadoJogo[3] = 1;
+  }
+
+  else if (atual == 12)
+  {
+    exit(0); // FECHAR
+  }
+}
+
 void handle_key_menu(unsigned char key, int mousex, int mousey)
 {
 
@@ -524,99 +634,10 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
     switch (key)
     {
     case (unsigned char)13: // tecla ENTER
-      if (atual == 0)
-      {
-        executa = 1;
-        janelaAtiva = 1;
-        perdeu = false;
-      }
-      if (atual == 1)
-      {
-        vet[atual].estado = 4;
-        vet[2].estado = 1;
-        vet[3].estado = 1;
-        estadoJogo[0] = 0;
-        velocidade = 600;
-      }
-      else if (atual == 2)
-      {
-        vet[atual].estado = 4;
-        vet[1].estado = 1;
-        vet[3].estado = 1;
-        estadoJogo[0] = 1;
-        velocidade = 200;
-      }
-      else if (atual == 3)
-      {
-        vet[atual].estado = 4;  
-        vet[1].estado = 1;
-        vet[2].estado = 1;
-        estadoJogo[0] = 2;
-        velocidade = 70;
-      }
-
-      else if (atual == 4)
-      {
-        vet[atual].estado = 4;
-        vet[5].estado = 1;
-        vet[6].estado = 1;
-        estadoJogo[1] = 0;
-      }
-      else if (atual == 5)
-      {
-        vet[atual].estado = 4;
-        vet[4].estado = 1;
-        vet[6].estado = 1;
-        estadoJogo[1] = 1;
-      }
-      else if (atual == 6)
-      {
-        vet[atual].estado = 4;
-        vet[4].estado = 1;
-        vet[5].estado = 1;
-        estadoJogo[1] = 2;
-      }
-
-      else if (atual == 7)
-      {
-        vet[atual].estado = 4;
-        vet[8].estado = 1;
-        vet[9].estado = 1;
-        estadoJogo[2] = 0;
-      }
-      else if (atual == 8)
-      {
-        vet[atual].estado = 4;
-        vet[7].estado = 1;
-        vet[9].estado = 1;
-        estadoJogo[2] = 1;
-      }
-      else if (atual == 9)
-      {
-        vet[atual].estado = 4;
-        vet[7].estado = 1;
-        vet[8].estado = 1;
-        estadoJogo[2] = 2;
-      }
-
-      else if (atual == 10)
-      {
-        vet[atual].estado = 4;
-        vet[11].estado = 1;
-        estadoJogo[3] = 0;
-      }
-      else if (atual == 11)
-      {
-        vet[atual].estado = 4;
-        vet[10].estado = 1;
-        estadoJogo[3] = 1;
-      }
-
-      else if (atual == 12)
-      {
-        exit(0); // FECHAR
-      }
+      trataSelecaoDeBotao(atual);
     }
+
+    // case()
     glutPostRedisplay();
   }
 
@@ -642,24 +663,39 @@ void handle_key_menu(unsigned char key, int mousex, int mousey)
     }
   }
 
-    if (janelaAtiva ==2){
+  if (janelaAtiva == 2)
+  {
 
-      switch(key)
-      {
-      case (unsigned char)27:
+    switch (key)
+    {
+    case (unsigned char)27:
       cout << "aqui";
-    executa = 0;
+      executa = 0;
       primeiro = false;
       ultimaTecla = -1;
 
       janelaAtiva = 0;
       glutPostRedisplay();
       break;
+    }
+  }
+}
 
+void HandleMouse(int button, int state, int x, int y)
+{
+  if (button == GLUT_LEFT_BUTTON)
+  {
+    for (int i = 0; i < 13; i++)
+    {
+      if (x <= vet[i].x + 400 && x >= vet[i].x + 300 && y <= -vet[i].y + 300 && y >= -vet[i].y + 260)
+      {
+        trataSelecaoDeBotao(i);
       }
     }
   }
 
+  glutPostRedisplay();
+}
 
 void reshape(int w, int h)
 {
@@ -676,12 +712,17 @@ void display(void)
 
     displayMenu(1);
   }
-  if (janelaAtiva == 1)
+  else if (janelaAtiva == 1 && estadoJogo[3] == 1)
+  {
+    rotacionaTela(1);
+    displayJogo(1);
+  }
+  else if (janelaAtiva == 1)
   {
     displayJogo(1);
   }
 
-  if (janelaAtiva == 2)
+  else if (janelaAtiva == 2)
   {
     displayPerdeu(1);
   }
@@ -698,6 +739,7 @@ int main(int argc, char **argv)
   init();
   glutKeyboardFunc(handle_key_menu);
   glutSpecialFunc(handle_arrow_key_menu);
+  glutMouseFunc(HandleMouse);
   //special serve pras setas, a keyboard pro ESC, Enter e espaço
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
