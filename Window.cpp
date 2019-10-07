@@ -10,42 +10,42 @@
 
 using namespace std;
 
-struct retangulo
+struct retangulo // Struct para representar os retangulos do menu principal
 {
-  int estado = 0;
-  double x = 0.0;
+  int estado = 0; // Os estados sao: 0 - nao selecionado, 1 - selecionado, 2 - marcado previamente, 3 - selecionado e marcado previamente
+  double x = 0.0; // Selecionar significa que o teclado esta sob essa opcao
   double y = 0.0;
   string texto = "";
 };
 
-int ultimaTecla = -1;
+int ultimaTecla = -1; // Variavel para armazenar ultima tecla pressionada valida
 
-int executa;
-retangulo vet[13];
-int atual = 0;
-int janelaAtiva = 0;    // 0 - menu, 1- jogo, 2- tela final
-int estadoJogo[4] = {}; // descreve o estado das configuracoes do jogo selecionadas no menu
-const int possiveisRotacoes[] = {0, 90, 180, 270};
-int larguraJogo;
-int alturaMaximaJogo;
-int velocidade = 600;
-bool perdeu = false;
-Tetris jogoComPecaCaindo(0);
-Tetris jogo(0);
+int executa;                                       // Variavel para inicializar valores inicias de um jogo (altura, largura, etc)
+retangulo vet[13];                                 // Vetor que armazenara os dados de cada retangulo de opcoes
+int atual = 0;                                     // Variavel para armazenar a opcao selecionada do menu
+int janelaAtiva = 0;                               // Variavel que representa a janela que  esta ativa na tela0 - menu, 1- jogo, 2- tela final
+int estadoJogo[4] = {};                            // Descreve o estado das configuracoes do jogo selecionadas no menu
+const int possiveisRotacoes[] = {0, 90, 180, 270}; // Valores possiveis de rotacao do jogo
+int larguraJogo;                                   // Variavel de largura do jogo
+int alturaMaximaJogo;                              // Variavel de altura maxima que o jogo podera ter
+int velocidade = 600;                              // Variavel   que define a velocidade da queda das pecas do jogo
+bool perdeu = false;                               // Variavel que define se um jogo foi perdido ou nao
+Tetris jogoComPecaCaindo(0);                       // Inicializacao para o jogo
+Tetris jogo(0);                                    // Inicializacao para o jogo
 
-int alturaPecaAtual;
-char idPecaAtual = "IJLOSTZ"[rand() % 7];
-int posicaoPecaAtual;
-int rotacaoPecaAtual = 0;
-bool primeiro = false;
-int altura;
-int largura;
+int alturaPecaAtual;                      // Variavel usada no jogo
+char idPecaAtual = "IJLOSTZ"[rand() % 7]; //  Pecas disponiveis no joog
+int posicaoPecaAtual;                     // Variavel de inicializacao do jogo
+int rotacaoPecaAtual = 0;                 // Variavel de inicializacao do jogo
+bool primeiro = false;                    // Variavel que define se o jogo esta sendo executado pela primeira vez
+int altura;                               // Variavel de altura do jogo
+int largura;                              // Variavel de largura do jogo
 
-int posinicialx = -150;
-int posinicialy = -300;
+int posinicialx = -150; // Posicao inicial de x na tela
+int posinicialy = -300; // Posicao inicial de y na tela
 
-void iniciaRetangulos()
-{
+void iniciaRetangulos() // Funcao para atribuicao de valores a cada retangulo do menu principal
+{                       // Cada retangulo possui um estado e eh atraves dele que decidimos qual configuracao o jogo tera
   for (int i = 0; i < 13; i++)
     vet[i].estado = 1;
 
@@ -108,7 +108,7 @@ void iniciaRetangulos()
   vet[12].texto = "SAIR";
 }
 
-void desenhaContorno(double x, double y)
+void desenhaContorno(double x, double y) // Funcao para desenho de contornos nos retangulos do menu principal
 {
   glPushMatrix();
   glLineWidth(3);
@@ -124,7 +124,7 @@ void desenhaContorno(double x, double y)
   glPopMatrix();
 }
 
-void desenhaRetangulo(int estado, double x, double y, const string &texto)
+void desenhaRetangulo(int estado, double x, double y, const string &texto) // Funcao de desenho de retangulos no menu principal
 {
   glPushMatrix();
   if (estado == 1 || estado == 2)
@@ -155,7 +155,7 @@ void desenhaRetangulo(int estado, double x, double y, const string &texto)
   glPopMatrix();
 }
 
-void INF390::texto(const std::string &texto, int x, int y, double tamanhoX, double tamanhoY)
+void INF390::texto(const std::string &texto, int x, int y, double tamanhoX, double tamanhoY) // Funcao de escrita de texto na tela
 {
   glPushMatrix();
   glLoadIdentity();
@@ -168,13 +168,13 @@ void INF390::texto(const std::string &texto, int x, int y, double tamanhoX, doub
   glPopMatrix();
 }
 
-void handle_arrow_key_menu(int key, int x, int y)
+void handle_arrow_key_menu(int key, int x, int y) // Tratamento de setas em cada janel
 {
   if (janelaAtiva == 0)
   {
     switch (key)
     {
-    case GLUT_KEY_UP:
+    case GLUT_KEY_UP: // Na janela 0 a navegacao eh de cima para baixo e dos lados, obedecendo a ordem da direita para a esquerda
       if (atual == 1 || atual == 2 || atual == 3)
       {
         vet[atual].estado--;
@@ -249,8 +249,8 @@ void handle_arrow_key_menu(int key, int x, int y)
     glutPostRedisplay();
   }
 
-  else if (janelaAtiva == 1)
-  {
+  else if (janelaAtiva == 1) // No caso da janela 1 (jogo executando), eh setado valores para ultimaTecla que serao tratados na funcao de displayJogo
+  {                          // Cada key recebida pelo teclado executara seu respectivo movimento na tela do jogo atraves da variavel ultimaTecla
 
     switch (key)
     {
@@ -274,11 +274,10 @@ void handle_arrow_key_menu(int key, int x, int y)
       break;
     }
     }
-    //glutSwapBuffers();
   }
 }
 
-void init(void)
+void init(void) // Funcao de inicializacao da tela
 {
   glClearColor(1.0, 1.0, 1.0, 1.0);
 
@@ -287,19 +286,12 @@ void init(void)
   gluOrtho2D(-300.0, 300.0, -300.0, 300.0);
 }
 
-void desenhaQuadrado(int x, int y, double tam, bool preenchido)
-{
+void desenhaQuadrado(int x, int y, double tam, bool preenchido) // Funcao responsavel por desenhar quadrados do jogo
+{                                                               // Eh chamada toda vez que a displayJogo eh executada, de forma a atualizar a tela com a posicao atual das pecas do jogo
   glTranslatef(x, y, 0);
 
-  // if (estadoJogo[2] == 0)
-  //   glColor3f(1, 0, 0);
-  // else if (estadoJogo[2] == 1)
-  //   glColor3f(0, 1, 1);
-  // else if (estadoJogo[2] == 2)
-  //   glColor3f(0.2, 0.8, 0.8);
-
-  if (!preenchido) // desenha fundo
-  {
+  if (!preenchido) // Tratamento para o caso de ser um quadrado que parte de uma peca, se a variavel preenchido for verdadeira,
+  {                // O quadrado nao eh preenchido
     if (estadoJogo[2] == 0)
       glColor3f(0.9, 0.9, 0.9);
     else if (estadoJogo[2] == 1)
@@ -313,7 +305,7 @@ void desenhaQuadrado(int x, int y, double tam, bool preenchido)
     glVertex2d(tam, 0);
     glEnd();
   }
-  else // desenha peca
+  else // Desenho dos locais que contem pecas (quadrados preenchidos)
   {
     if (estadoJogo[2] == 0)
       glColor3f(0, 0, 0);
@@ -331,12 +323,8 @@ void desenhaQuadrado(int x, int y, double tam, bool preenchido)
   glLoadIdentity();
 }
 
-// void desenhaJogo(int altura, int largura) {
-
-// }
-
-void displayPerdeu(int value)
-{
+void displayPerdeu(int value) // Funcao de display que desenha na tela caso o usuario perca o jogo
+{                             // Eh chamada quando nao ha como adicionar novas pecas na tela e pode retornar ao menu principal atraves da tecla ESC
   glClear(GL_COLOR_BUFFER_BIT);
   glLoadIdentity();
   glColor3f(1.0f, 0.0f, 0.0f);
@@ -345,8 +333,8 @@ void displayPerdeu(int value)
   glutSwapBuffers();
 }
 
-void atualizaJogo()
-{
+void atualizaJogo() // Funcao que processa o posicionamento das pecas e trata a logica do jogo, como movimentos, reducao de colunas preenchidas, fronteiras, etc
+{                   // Logica adaptada da funcao jogoTetris.cpp vinculada ao trabalho original
   jogoComPecaCaindo = jogo;
 
   if (ultimaTecla == 0)
@@ -368,7 +356,7 @@ void atualizaJogo()
   }
 
   else if (ultimaTecla == 2)
-  { //a tecla de espaco e' utilizada para rodar a peca...
+  {
     Tetris jogoTeste = jogoComPecaCaindo;
 
     if (jogoTeste.adicionaForma(posicaoPecaAtual, alturaPecaAtual, idPecaAtual, possiveisRotacoes[(rotacaoPecaAtual + 1) % 4]))
@@ -387,24 +375,17 @@ void atualizaJogo()
     ultimaTecla = -1;
   }
 
-  //Antes de diminuirmos a altura de uma peca, tentamos adiciona-la nessa nova altura
-  // Se a funcao retornar true --> significa que podemos diminuir
-  // Senao --> isso significa que apeca colidiria (ocuparia o mesmo espaco que) com alguma peca fixa --> a peca devera parar na altura anterior
-  // e uma nova peca deve comecar a cair
-
   if (jogoComPecaCaindo.adicionaForma(posicaoPecaAtual, alturaPecaAtual - 1, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
   {
     alturaPecaAtual--;
   }
   else
   {
-    //adiciona a peca a posicao onde ela ficara fixada
     if (jogo.adicionaForma(posicaoPecaAtual, alturaPecaAtual, idPecaAtual, possiveisRotacoes[rotacaoPecaAtual]))
     {
 
       jogoComPecaCaindo = jogo;
 
-      //sorteia uma nova peca, define a altura como sendo o topo da tela, etc...
       idPecaAtual = "IJLOSTZ"[rand() % 7];
       posicaoPecaAtual = larguraJogo / 2 - 2;
       alturaPecaAtual = alturaMaximaJogo;
@@ -412,7 +393,7 @@ void atualizaJogo()
       jogoComPecaCaindo.removeLinhasCompletas();
       jogo = jogoComPecaCaindo;
     }
-    else
+    else // Caso nao seja possivel adicionar a peca, a variavel perdeu fica true e a tela de derrota eh renderizada em seguida
     {
       perdeu = true;
     }
@@ -428,14 +409,14 @@ void rotacionaTela(int value)
   glutPostRedisplay();
 }
 
-void displayJogo(int value)
+void displayJogo(int value) // Funcao chamada de tempos em tempos para renderizacao da tela do jogo (janela 2)
 {
-  if (!perdeu)
+  if (!perdeu) // Caso o jogador nao tenha perdido, a tela sera renderizada
   {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
 
-    if (executa != 0)
+    if (executa != 0) // A variavel executa quando diferente de 0 (caso em que ESC e pressionado), permite que o jogo siga seu caminho logico de execucao
     {
 
       if (estadoJogo[1] == 0)
@@ -472,9 +453,9 @@ void displayJogo(int value)
 
       atualizaJogo();
 
-      for (int i = 0; i < largura; i++) // i = x = largura
+      for (int i = 0; i < largura; i++) // Logica do desenho na tela: caso a posicao na matriz do jogo seja uma letra, entao o quadrado sera preenchido, caso contrario nao sera
       {
-        for (int j = 0; j < altura; j++) // j = y = altura
+        for (int j = 0; j < altura; j++)
         {
           if (jogoComPecaCaindo.get(i, j) != ' ')
           {
@@ -487,20 +468,18 @@ void displayJogo(int value)
         }
       }
 
-      glutTimerFunc(velocidade, displayJogo, 1);
+      glutTimerFunc(velocidade, displayJogo, 1); // A velocidade do jogo e definida pelas opcoes marcadas no menu principal, atraves da variavel velocidade
       glutSwapBuffers();
     }
   }
-  if (perdeu == true)
+  if (perdeu == true) // Se o usuario perder o jogo, entao uma nova tela sera renderizada
   {
     janelaAtiva = 2;
     glutTimerFunc(500, displayPerdeu, 1);
-
-    //glutPostRedisplay();    perdeu=false;
   }
 }
 
-void displayMenu(int value)
+void displayMenu(int value) // Funcao para desenho do menu principal do jogo
 {
   if (janelaAtiva == 0)
   {
@@ -538,7 +517,7 @@ void trataSelecaoDeBotao(int atual)
     janelaAtiva = 1;
     perdeu = false;
   }
-  if (atual == 1)
+  if (atual == 1) // Atual 1, 2, 3 sao referentes a configuracoes de velocidade do jogo
   {
     vet[atual].estado = 4;
     vet[2].estado = 1;
@@ -563,7 +542,7 @@ void trataSelecaoDeBotao(int atual)
     velocidade = 70;
   }
 
-  else if (atual == 4)
+  else if (atual == 4) // atual com valor 4,5,6 sao referentes a tamanhos de jogo pre-definidos (20x10, 30x15, 50x25)
   {
     vet[atual].estado = 4;
     vet[5].estado = 1;
@@ -585,7 +564,7 @@ void trataSelecaoDeBotao(int atual)
     estadoJogo[1] = 2;
   }
 
-  else if (atual == 7)
+  else if (atual == 7) // atual com valor 7,8 e 9 sao referentes as cores do jogo
   {
     vet[atual].estado = 4;
     vet[8].estado = 1;
@@ -607,7 +586,7 @@ void trataSelecaoDeBotao(int atual)
     estadoJogo[2] = 2;
   }
 
-  else if (atual == 10)
+  else if (atual == 10) // atual com valor 10,11 sao referentes aos modos de jogo
   {
     vet[atual].estado = 4;
     vet[11].estado = 1;
@@ -620,56 +599,54 @@ void trataSelecaoDeBotao(int atual)
     estadoJogo[3] = 1;
   }
 
-  else if (atual == 12)
+  else if (atual == 12) // atual com valor 12 indica fechamento do jogo
   {
     exit(0); // FECHAR
   }
 }
 
-void handle_key_menu(unsigned char key, int mousex, int mousey)
+void handle_key_menu(unsigned char key, int mousex, int mousey) // Tratamento de entrada de teclas enter, esc e espaco do teclado
 {
 
   if (janelaAtiva == 0)
   {
     switch (key)
     {
-    case (unsigned char)13: // tecla ENTER
+    case (unsigned char)13: // Na tela 1, o enter inicia o jogo caso a opcao atual seja 0
       trataSelecaoDeBotao(atual);
     }
 
-    // case()
     glutPostRedisplay();
   }
 
-  if (janelaAtiva == 1)
+  if (janelaAtiva == 1) // caso a janela ativa seja a 1 (referente ao jogo executando), as teclas tratadas serao espaco e esc
   {
     switch (key)
     {
-    case ' ':
+    case ' ': // espaco seta a variavel ultimaTecla para 2, o que gera uma rotacao em atualizaJogo
 
       ultimaTecla = 2;
 
       break;
 
-    case (unsigned char)27:
+    case (unsigned char)27: // esc seta a variavel executa para 0, interrompendo a renderizacao da tela e retornando a tela inicial (janelaAtiva=0)
 
       executa = 0;
       primeiro = false;
       ultimaTecla = -1;
-
       janelaAtiva = 0;
+      atual = 0;
       glutPostRedisplay();
       break;
     }
   }
 
-  if (janelaAtiva == 2)
-  {
+  if (janelaAtiva == 2)       // no caso da janela 2 (janela de jogo perdido) o jogo eh interrompido (executa =0), os valores do jogo sao reiniciados (primeiro = false)
+  {                           // e a janela retorna ao menu principal (janelaAtiva=0)
 
     switch (key)
     {
     case (unsigned char)27:
-      cout << "aqui";
       executa = 0;
       primeiro = false;
       ultimaTecla = -1;
@@ -693,11 +670,9 @@ void HandleMouse(int button, int state, int x, int y)
       }
     }
   }
-
-  glutPostRedisplay();
 }
 
-void reshape(int w, int h)
+void reshape(int w, int h)      // Funcao para redimensionamento da tela
 {
   glViewport((w - 600) / 2 - ((h - 600) / 2), 0, (GLsizei)h, (GLsizei)h);
   glMatrixMode(GL_PROJECTION);
@@ -705,7 +680,7 @@ void reshape(int w, int h)
   gluOrtho2D(-300, 300, -300, 300);
 }
 
-void display(void)
+void display(void)      // Funcao para telas de display
 {
   if (janelaAtiva == 0)
   {
