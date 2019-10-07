@@ -400,14 +400,6 @@ void atualizaJogo() // Funcao que processa o posicionamento das pecas e trata a 
   }
 }
 
-int contadorIteracoes = 0;
-void rotacionaTela(int value)
-{
-  glRotatef(30, 0, 0, 1);
-  cout << contadorIteracoes++ << endl;
-  glutTimerFunc(3000, rotacionaTela, 1);
-  glutPostRedisplay();
-}
 
 void displayJogo(int value) // Funcao chamada de tempos em tempos para renderizacao da tela do jogo (janela 2)
 {
@@ -669,6 +661,7 @@ void HandleMouse(int button, int state, int x, int y)
         trataSelecaoDeBotao(i);
       }
     }
+    glutPostRedisplay();
   }
 }
 
@@ -687,11 +680,7 @@ void display(void)      // Funcao para telas de display
 
     displayMenu(1);
   }
-  else if (janelaAtiva == 1 && estadoJogo[3] == 1)
-  {
-    rotacionaTela(1);
-    displayJogo(1);
-  }
+
   else if (janelaAtiva == 1)
   {
     displayJogo(1);
